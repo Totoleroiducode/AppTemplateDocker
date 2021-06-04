@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api/customer")
@@ -22,7 +24,7 @@ public class CustomerController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<Customer> duplicateAcquisition(@RequestBody Customer  customer) {
+    public ResponseEntity<Customer> addCustomer(@RequestBody Customer  customer) {
 
         try {
             Customer nCustomer = new Customer();
@@ -39,4 +41,17 @@ public class CustomerController {
         }
 
     }
+    @GetMapping("/{id}")
+    public  Customer getCustomer(@PathVariable   long id){
+        Customer customerFound = null;
+
+        Optional<Customer> optCustomer =customerRepository.findById(id);
+
+         if(optCustomer.isPresent()){
+              customerFound = optCustomer.get();
+         }
+         return customerFound;
+    }
+
+
 }
