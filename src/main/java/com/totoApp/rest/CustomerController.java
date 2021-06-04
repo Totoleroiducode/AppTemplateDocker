@@ -1,5 +1,6 @@
 package com.totoApp.rest;
 
+import com.totoApp.exceptions.ResourceNotFoundException;
 import com.totoApp.model.Customer;
 import com.totoApp.repository.CustomerRepository;
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin
@@ -24,7 +27,7 @@ public class CustomerController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<Customer> addCustomer(@RequestBody Customer  customer) {
+    public ResponseEntity<Customer> addCustomer(@RequestBody Customer customer) {
 
         try {
             Customer nCustomer = new Customer();
@@ -32,6 +35,7 @@ public class CustomerController {
             nCustomer.setLastName(customer.getLastName());
 
             customerRepository.save(nCustomer);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(nCustomer);
 
         } catch (Exception e) {
@@ -41,16 +45,43 @@ public class CustomerController {
         }
 
     }
-    @GetMapping("/{id}")
-    public  Customer getCustomer(@PathVariable   long id){
+
+    @GetMapping("/retrieve/")
+    public Customer findCustomerById(@RequestParam(name = "id") long id) {
         Customer customerFound = null;
 
-        Optional<Customer> optCustomer =customerRepository.findById(id);
 
-         if(optCustomer.isPresent()){
-              customerFound = optCustomer.get();
-         }
-         return customerFound;
+        Optional<Customer> optCustomer = customerRepository.findById(id);
+
+        if (optCustomer.isPresent()) {
+            customerFound = optCustomer.get();
+        }
+        return customerFound;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Customer>> findAllCustomer() {
+        List<Customer> customerList = new ArrayList<>();
+        try {
+            customerList = customerRepository.findAll();
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(customerList);
+
+        } catch (Exception e) {
+            LOGGER.error("Something went wrong during the Customers retrieving", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        }
+
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable(name = "id") long id) {
+        Customer customer = customerRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Customer not found " + id));
+        customerRepository.delete(customer);
+        return ResponseEntity.ok().build();
+
     }
 
 
