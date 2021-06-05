@@ -23,3 +23,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=vivi
       - POSTGRES_DB=newdb
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+  ui:
+    image: '=ui:latest'
+      build:
+        context: ../../../totoappui
+        dockerfile: ../../../totoappui/Dockerfile
+      container_name: ui
+    volumes:
+      - /app/node_modules
+      - ./ui:/app
+      ports:
+        - "3000:8080"
